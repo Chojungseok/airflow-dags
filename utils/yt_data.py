@@ -4,6 +4,9 @@ from googleapiclient.discovery import build
 from dotenv import load_dotenv
 import os
 from pprint import pprint
+from hdfs import InsecureClient
+from datetime import datetime 
+import json
 
 
 
@@ -90,3 +93,20 @@ def get_hadle_to_comments(youtube, handle):
     }
 
 get_hadle_to_comments(youtube, target_handle)
+
+def save_to_hdfs(data, path):
+    client = InsecureClient('http://localhost:9870', user = 'jungseok')
+    current_date = datetime.now().strftime('%y%m%d%H%M')
+    file_name = f'{current_date}.json'
+
+    # input/yt-date + 2504241144
+    hdfs_path = f'{path}/{file_name}'
+
+    json_data = json.dumps(data, ensure_ascii = False)
+
+    with client.write(hdfs_path, encoding='utf-8') as writer:
+        writer.write(json_data)
+
+data = get_hadle_to_comments(youtube, target_handle)
+
+save_to_hdfs(data, '/input/yt-data')
